@@ -41,6 +41,31 @@
               👤 {{ activity.joinedMembers.join(', ') }}
             </span>
           </div>
+          
+          <!-- Rating Section -->
+          <div class="rating-section">
+            <div class="rating-label">Rate this activity:</div>
+            <div class="star-rating">
+              <span 
+                v-for="star in 5" 
+                :key="star"
+                class="star"
+                :class="{ 
+                  active: star <= activity.rating,
+                  hover: hoverRating >= star && hoverRating > 0
+                }"
+                @click="rateActivity(activity, star)"
+                @mouseenter="hoverRating = star"
+                @mouseleave="hoverRating = 0"
+              >
+                <span class="star-icon">★</span>
+              </span>
+            </div>
+            <div class="rating-display">
+              {{ activity.rating }}/5 stars
+            </div>
+          </div>
+          
           <button class="join-btn" @click="openJoinDialog(activity)">
             Join Activity
           </button>
@@ -86,6 +111,7 @@ const selectedType = ref('')
 const showDialog = ref(false)
 const selectedActivity = ref<any>(null)
 const memberName = ref('')
+const hoverRating = ref(0)
 
 // Activity data
 const activities = ref([
@@ -97,7 +123,8 @@ const activities = ref([
     location: 'Central Park',
     time: '06:00 - 07:00',
     participants: 15,
-    joinedMembers: []
+    joinedMembers: [],
+    rating: 0
   },
   {
     id: 2,
@@ -107,7 +134,8 @@ const activities = ref([
     location: 'Community Center',
     time: '18:00 - 19:00',
     participants: 20,
-    joinedMembers: []
+    joinedMembers: [],
+    rating: 0
   },
   {
     id: 3,
@@ -117,7 +145,8 @@ const activities = ref([
     location: 'Fitness Center',
     time: '19:00 - 20:30',
     participants: 10,
-    joinedMembers: []
+    joinedMembers: [],
+    rating: 0
   }
 ])
 
@@ -164,6 +193,12 @@ const joinActivity = () => {
   
   // Close dialog
   closeDialog()
+}
+
+const rateActivity = (activity: any, rating: number) => {
+  activity.rating = rating
+  // Show rating confirmation
+  alert(`You rated "${activity.title}" ${rating} star${rating > 1 ? 's' : ''}!`)
 }
 </script>
 
@@ -305,6 +340,62 @@ const joinActivity = () => {
 .joined-members {
   color: var(--primary-color) !important;
   font-weight: 600;
+}
+
+/* Rating Section Styles */
+.rating-section {
+  margin: var(--spacing-4) 0;
+  padding: var(--spacing-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.rating-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.star-rating {
+  display: flex;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-2);
+}
+
+.star {
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: inline-block;
+  position: relative;
+}
+
+.star-icon {
+  font-size: var(--font-size-xl);
+  color: #ddd;
+  transition: var(--transition-normal);
+  display: block;
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+
+.star.hover .star-icon {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.star.active .star-icon {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+.rating-display {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .join-btn {
@@ -504,6 +595,20 @@ const joinActivity = () => {
     gap: var(--spacing-3);
   }
   
+  .rating-section {
+    margin: var(--spacing-3) 0;
+    padding: var(--spacing-3);
+  }
+  
+  .star-rating {
+    justify-content: center;
+    gap: var(--spacing-2);
+  }
+  
+  .star {
+    font-size: var(--font-size-lg);
+  }
+  
   .dialog {
     margin: var(--spacing-4);
     max-width: 350px;
@@ -576,6 +681,25 @@ const joinActivity = () => {
   
   .activity-details span {
     font-size: var(--font-size-xs);
+  }
+  
+  .rating-section {
+    margin: var(--spacing-2) 0;
+    padding: var(--spacing-2);
+  }
+  
+  .rating-label {
+    font-size: var(--font-size-xs);
+    text-align: center;
+  }
+  
+  .star {
+    font-size: var(--font-size-base);
+  }
+  
+  .rating-display {
+    font-size: var(--font-size-xs);
+    text-align: center;
   }
   
   .join-btn {
