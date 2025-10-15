@@ -1,8 +1,23 @@
 <template>
   <div class="auth-container">
     <div class="auth-card">
-      <h2>Sign In to ActivePath</h2>
-      <form @submit.prevent="handleLogin" class="auth-form">
+      <h2>Create Your ActivePath Account</h2>
+      <form @submit.prevent="handleRegister" class="auth-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            v-model="form.username"
+            type="text"
+            :class="{ 'error': v$.username.$error }"
+            placeholder="Enter your username"
+            @blur="v$.username.$touch"
+          />
+          <span v-if="v$.username.$error" class="error-message">
+            {{ v$.username.$errors[0].$message }}
+          </span>
+        </div>
+
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -25,7 +40,7 @@
             v-model="form.password"
             type="password"
             :class="{ 'error': v$.password.$error }"
-            placeholder="Enter your password"
+            placeholder="Enter password (minimum 6 characters)"
             @blur="v$.password.$touch"
           />
           <span v-if="v$.password.$error" class="error-message">
@@ -34,89 +49,83 @@
         </div>
 
         <div class="form-group">
-          <label for="userType">Account Type</label>
-          <select
-            id="userType"
-            v-model="form.userType"
-            :class="{ 'error': v$.userType.$error }"
-            @blur="v$.userType.$touch"
-          >
-            <option value="">Select account type</option>
-            <option value="user">Regular User</option>
-            <option value="admin">Administrator</option>
-          </select>
-          <span v-if="v$.userType.$error" class="error-message">
-            {{ v$.userType.$errors[0].$message }}
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            id="confirmPassword"
+            v-model="form.confirmPassword"
+            type="password"
+            :class="{ 'error': v$.confirmPassword.$error }"
+            placeholder="Confirm your password"
+            @blur="v$.confirmPassword.$touch"
+          />
+          <span v-if="v$.confirmPassword.$error" class="error-message">
+            {{ v$.confirmPassword.$errors[0].$message }}
           </span>
         </div>
 
         <button type="submit" class="submit-btn" :disabled="isLoading">
-          {{ isLoading ? 'Signing in...' : 'Sign In' }}
+          {{ isLoading ? 'Creating account...' : 'Create Account' }}
         </button>
       </form>
 
       <div class="auth-links">
-        <p>Don't have an account? <RouterLink to="/register">Create one now</RouterLink></p>
+        <p>Already have an account? <RouterLink to="/login">Sign in now</RouterLink></p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, email } from '@vuelidate/validators'
-import { RouterLink, useRouter } from 'vue-router'
-import { useUserStore } from '../stores/userStore'
+import { required, email, minLength, sameAs } from '@vuelidate/validators'
+import { RouterLink } from 'vue-router'
 
-const router = useRouter()
 const isLoading = ref(false)
-const { login } = useUserStore()
 
 const form = reactive({
+  username: '',
   email: '',
   password: '',
-  userType: ''
+  confirmPassword: ''
 })
 
-const rules = {
+const rules = computed(() => ({
+  username: { 
+    required, 
+    minLength: minLength(3) 
+  },
   email: { required, email },
-  password: { required },
-  userType: { required }
-}
+  password: { 
+    required, 
+    minLength: minLength(6) 
+  },
+  confirmPassword: { 
+    required, 
+    sameAsPassword: sameAs(form.password) 
+  }
+}))
 
 const v$ = useVuelidate(rules, form)
 
-const handleLogin = async () => {
+const handleRegister = async () => {
   const isValid = await v$.value.$validate()
   if (!isValid) return
 
   isLoading.value = true
   
   try {
-    // Simulate login request
+    // Simulate registration request
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // For demo purposes, we'll use the email as username
-    // In a real app, this would come from the API response
-    const username = form.email.split('@')[0]
+    // Here should call actual registration API
+    console.log('Registration info:', form)
     
-    // Login user and save to store
-    login({
-      username: username,
-      email: form.email,
-      userType: form.userType as 'user' | 'admin'
-    })
-    
-    // Handle successful login - redirect based on user type
-    if (form.userType === 'admin') {
-      router.push('/admin')
-    } else {
-      router.push('/')
-    }
+    // Handle successful registration
+    alert('Account created successfully! Please sign in to your account.')
   } catch (error) {
-    console.error('Login failed:', error)
-    alert('Login failed, please try again')
+    console.error('Registration failed:', error)
+    alert('Registration failed, please try again')
   } finally {
     isLoading.value = false
   }
@@ -168,24 +177,20 @@ const handleLogin = async () => {
   font-size: var(--font-size-sm);
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   padding: var(--spacing-3) var(--spacing-4);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
   transition: var(--transition-normal);
-  background: white;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: var(--primary-color);
 }
 
-.form-group input.error,
-.form-group select.error {
+.form-group input.error {
   border-color: #e74c3c;
 }
 

@@ -32,23 +32,12 @@
           <div class="nav-icon">👤</div>
           <span>Account</span>
         </RouterLink>
-        <RouterLink v-if="user.isLoggedIn && user.userType === 'admin'" to="/admin" class="nav-item" active-class="active">
-          <div class="nav-icon">⚙️</div>
-          <span>Admin</span>
-        </RouterLink>
       </div>
 
-      <!-- Auth Buttons / User Info -->
+      <!-- Auth Buttons -->
       <div class="auth-buttons desktop-auth">
-        <div v-if="user.isLoggedIn" class="user-info">
-          <span class="welcome-text">Welcome,</span>
-          <span class="username">{{ user.username }}</span>
-          <button class="logout-btn" @click="handleLogout">Logout</button>
-        </div>
-        <div v-else class="auth-buttons-group">
-          <RouterLink to="/login" class="auth-btn auth-btn-login">Login</RouterLink>
-          <RouterLink to="/register" class="auth-btn auth-btn-signup">Sign Up</RouterLink>
-        </div>
+        <RouterLink to="/login" class="auth-btn auth-btn-login">Login</RouterLink>
+        <RouterLink to="/register" class="auth-btn auth-btn-signup">Sign Up</RouterLink>
       </div>
 
       <!-- Mobile Menu Button -->
@@ -90,35 +79,20 @@
         <div class="nav-icon">👤</div>
         <span>Account</span>
       </RouterLink>
-      <RouterLink v-if="user.isLoggedIn && user.userType === 'admin'" to="/admin" class="mobile-nav-item" @click="closeMobileMenu">
-        <div class="nav-icon">⚙️</div>
-        <span>Admin</span>
-      </RouterLink>
       
       <div class="mobile-auth">
-        <div v-if="user.isLoggedIn" class="mobile-user-info">
-          <div class="mobile-welcome">
-            <span class="welcome-text">Welcome,</span>
-            <span class="username">{{ user.username }}</span>
-          </div>
-          <button class="mobile-logout-btn" @click="handleLogout">Logout</button>
-        </div>
-        <div v-else class="mobile-auth-buttons">
-          <RouterLink to="/login" class="mobile-auth-btn" @click="closeMobileMenu">Login</RouterLink>
-          <RouterLink to="/register" class="mobile-auth-btn primary" @click="closeMobileMenu">Sign Up</RouterLink>
-        </div>
+        <RouterLink to="/login" class="mobile-auth-btn" @click="closeMobileMenu">Login</RouterLink>
+        <RouterLink to="/register" class="mobile-auth-btn primary" @click="closeMobileMenu">Sign Up</RouterLink>
       </div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useUserStore } from '../stores/userStore'
 
 const isMobileMenuOpen = ref(false)
-const { user, logout, loadUserFromStorage } = useUserStore()
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -127,16 +101,6 @@ const toggleMobileMenu = () => {
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
 }
-
-const handleLogout = () => {
-  logout()
-  closeMobileMenu()
-}
-
-// Load user from localStorage on component mount
-onMounted(() => {
-  loadUserFromStorage()
-})
 </script>
 
 <style scoped>
@@ -238,44 +202,6 @@ onMounted(() => {
   display: flex;
   gap: var(--spacing-3);
   align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3);
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
-}
-
-.welcome-text {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-}
-
-.username {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.logout-btn {
-  background: none;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  transition: var(--transition-normal);
-}
-
-.logout-btn:hover {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--text-primary);
 }
 
 .auth-btn {
@@ -414,41 +340,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
-}
-
-.mobile-user-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3);
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
-}
-
-.mobile-welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-1);
-}
-
-.mobile-logout-btn {
-  background: none;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: var(--transition-normal);
-  text-align: center;
-}
-
-.mobile-logout-btn:hover {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--text-primary);
 }
 
 .mobile-auth-btn {
