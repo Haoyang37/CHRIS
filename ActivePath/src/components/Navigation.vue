@@ -24,10 +24,6 @@
           <div class="nav-icon">👥</div>
           <span>Community</span>
         </RouterLink>
-        <RouterLink to="/resources" class="nav-item" active-class="active">
-          <div class="nav-icon">📚</div>
-          <span>Resources</span>
-        </RouterLink>
         <RouterLink to="/account" class="nav-item" active-class="active">
           <div class="nav-icon">👤</div>
           <span>Account</span>
@@ -38,16 +34,24 @@
         </RouterLink>
       </div>
 
-      <!-- Auth Buttons / User Info -->
-      <div class="auth-buttons desktop-auth">
-        <div v-if="user.isLoggedIn" class="user-info">
-          <span class="welcome-text">Welcome,</span>
-          <span class="username">{{ user.username }}</span>
-          <button class="logout-btn" @click="handleLogout">Logout</button>
-        </div>
-        <div v-else class="auth-buttons-group">
-          <RouterLink to="/login" class="auth-btn auth-btn-login">Login</RouterLink>
-          <RouterLink to="/register" class="auth-btn auth-btn-signup">Sign Up</RouterLink>
+      <!-- Theme Toggle & Auth Buttons -->
+      <div class="nav-controls desktop-controls">
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle-btn" @click="toggleTheme" :title="themeText">
+          <div class="theme-icon">{{ themeIcon }}</div>
+        </button>
+        
+        <!-- Auth Buttons / User Info -->
+        <div class="auth-buttons">
+          <div v-if="user.isLoggedIn" class="user-info">
+            <span class="welcome-text">Welcome,</span>
+            <span class="username">{{ user.username }}</span>
+            <button class="logout-btn" @click="handleLogout">Logout</button>
+          </div>
+          <div v-else class="auth-buttons-group">
+            <RouterLink to="/login" class="auth-btn auth-btn-login">Login</RouterLink>
+            <RouterLink to="/register" class="auth-btn auth-btn-signup">Sign Up</RouterLink>
+          </div>
         </div>
       </div>
 
@@ -82,10 +86,6 @@
         <div class="nav-icon">👥</div>
         <span>Community</span>
       </RouterLink>
-      <RouterLink to="/resources" class="mobile-nav-item" @click="closeMobileMenu">
-        <div class="nav-icon">📚</div>
-        <span>Resources</span>
-      </RouterLink>
       <RouterLink to="/account" class="mobile-nav-item" @click="closeMobileMenu">
         <div class="nav-icon">👤</div>
         <span>Account</span>
@@ -94,6 +94,14 @@
         <div class="nav-icon">⚙️</div>
         <span>Admin</span>
       </RouterLink>
+      
+      <!-- Mobile Theme Toggle -->
+      <div class="mobile-theme-toggle">
+        <button class="mobile-theme-btn" @click="toggleTheme">
+          <div class="theme-icon">{{ themeIcon }}</div>
+          <span>{{ themeText }}</span>
+        </button>
+      </div>
       
       <div class="mobile-auth">
         <div v-if="user.isLoggedIn" class="mobile-user-info">
@@ -116,9 +124,11 @@
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
+import { useThemeStore } from '../stores/themeStore'
 
 const isMobileMenuOpen = ref(false)
 const { user, logout, loadUserFromStorage } = useUserStore()
+const { themeIcon, themeText, toggleTheme, loadThemeFromStorage } = useThemeStore()
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -133,9 +143,10 @@ const handleLogout = () => {
   closeMobileMenu()
 }
 
-// Load user from localStorage on component mount
+// Load user and theme from localStorage on component mount
 onMounted(() => {
   loadUserFromStorage()
+  loadThemeFromStorage()
 })
 </script>
 
@@ -149,6 +160,11 @@ onMounted(() => {
   z-index: 1000;
   box-shadow: var(--shadow-sm);
   border-bottom: 1px solid var(--border-light);
+  transition: var(--transition-normal);
+}
+
+.dark .navigation {
+  background: rgba(17, 24, 39, 0.95);
 }
 
 .nav-container {
@@ -232,6 +248,44 @@ onMounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.nav-controls {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-icon {
+  font-size: var(--font-size-lg);
+  transition: var(--transition-normal);
+}
+
+.theme-toggle-btn:hover .theme-icon {
+  transform: rotate(20deg);
 }
 
 .auth-buttons {
@@ -350,6 +404,10 @@ onMounted(() => {
   border-bottom: 1px solid var(--border-light);
 }
 
+.dark .mobile-nav {
+  background: rgba(17, 24, 39, 0.98);
+}
+
 .mobile-nav.open {
   transform: translateY(0);
   opacity: 1;
@@ -404,6 +462,41 @@ onMounted(() => {
 
 .mobile-nav-item .nav-icon {
   margin-right: var(--spacing-3);
+  font-size: var(--font-size-lg);
+}
+
+.mobile-theme-toggle {
+  margin: var(--spacing-4) 0;
+  padding: var(--spacing-3) 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.mobile-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  background: none;
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  width: 100%;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.mobile-theme-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-theme-btn .theme-icon {
   font-size: var(--font-size-lg);
 }
 
@@ -482,7 +575,7 @@ onMounted(() => {
 /* Responsive Design */
 @media (max-width: 768px) {
   .desktop-nav,
-  .desktop-auth {
+  .desktop-controls {
     display: none;
   }
   
