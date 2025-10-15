@@ -33,6 +33,23 @@
           </span>
         </div>
 
+        <div class="form-group">
+          <label for="userType">Account Type</label>
+          <select
+            id="userType"
+            v-model="form.userType"
+            :class="{ 'error': v$.userType.$error }"
+            @blur="v$.userType.$touch"
+          >
+            <option value="">Select account type</option>
+            <option value="user">Regular User</option>
+            <option value="admin">Administrator</option>
+          </select>
+          <span v-if="v$.userType.$error" class="error-message">
+            {{ v$.userType.$errors[0].$message }}
+          </span>
+        </div>
+
         <button type="submit" class="submit-btn" :disabled="isLoading">
           {{ isLoading ? 'Signing in...' : 'Sign In' }}
         </button>
@@ -50,18 +67,22 @@ import { ref, reactive } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
 import { RouterLink, useRouter } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
 
 const router = useRouter()
 const isLoading = ref(false)
+const { login } = useUserStore()
 
 const form = reactive({
   email: '',
-  password: ''
+  password: '',
+  userType: ''
 })
 
 const rules = {
   email: { required, email },
-  password: { required }
+  password: { required },
+  userType: { required }
 }
 
 const v$ = useVuelidate(rules, form)
@@ -76,11 +97,23 @@ const handleLogin = async () => {
     // Simulate login request
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // Here should call actual login API
-    console.log('Login info:', form)
+    // For demo purposes, we'll use the email as username
+    // In a real app, this would come from the API response
+    const username = form.email.split('@')[0]
     
-    // Handle successful login - redirect to home page
-    router.push('/')
+    // Login user and save to store
+    login({
+      username: username,
+      email: form.email,
+      userType: form.userType as 'user' | 'admin'
+    })
+    
+    // Handle successful login - redirect based on user type
+    if (form.userType === 'admin') {
+      router.push('/admin')
+    } else {
+      router.push('/')
+    }
   } catch (error) {
     console.error('Login failed:', error)
     alert('Login failed, please try again')
@@ -135,20 +168,24 @@ const handleLogin = async () => {
   font-size: var(--font-size-sm);
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   padding: var(--spacing-3) var(--spacing-4);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
   transition: var(--transition-normal);
+  background: white;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: var(--primary-color);
 }
 
-.form-group input.error {
+.form-group input.error,
+.form-group select.error {
   border-color: #e74c3c;
 }
 

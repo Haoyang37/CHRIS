@@ -63,23 +63,6 @@
           </span>
         </div>
 
-        <div class="form-group">
-          <label for="userType">Account Type</label>
-          <select
-            id="userType"
-            v-model="form.userType"
-            :class="{ 'error': v$.userType.$error }"
-            @blur="v$.userType.$touch"
-          >
-            <option value="">Select account type</option>
-            <option value="user">Regular User</option>
-            <option value="admin">Administrator</option>
-          </select>
-          <span v-if="v$.userType.$error" class="error-message">
-            {{ v$.userType.$errors[0].$message }}
-          </span>
-        </div>
-
         <button type="submit" class="submit-btn" :disabled="isLoading">
           {{ isLoading ? 'Creating account...' : 'Create Account' }}
         </button>
@@ -96,19 +79,15 @@
 import { ref, reactive, computed } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email, minLength, sameAs } from '@vuelidate/validators'
-import { RouterLink, useRouter } from 'vue-router'
-import { useUserStore } from '../stores/userStore'
+import { RouterLink } from 'vue-router'
 
 const isLoading = ref(false)
-const router = useRouter()
-const { register } = useUserStore()
 
 const form = reactive({
   username: '',
   email: '',
   password: '',
-  confirmPassword: '',
-  userType: ''
+  confirmPassword: ''
 })
 
 const rules = computed(() => ({
@@ -124,8 +103,7 @@ const rules = computed(() => ({
   confirmPassword: { 
     required, 
     sameAsPassword: sameAs(form.password) 
-  },
-  userType: { required }
+  }
 }))
 
 const v$ = useVuelidate(rules, form)
@@ -140,22 +118,11 @@ const handleRegister = async () => {
     // Simulate registration request
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // Register user and save to store
-    register({
-      username: form.username,
-      email: form.email,
-      userType: form.userType as 'user' | 'admin'
-    })
+    // Here should call actual registration API
+    console.log('Registration info:', form)
     
     // Handle successful registration
-    alert(`Welcome ${form.username}! Your account has been created successfully.`)
-    
-    // Redirect based on user type
-    if (form.userType === 'admin') {
-      router.push('/admin')
-    } else {
-      router.push('/')
-    }
+    alert('Account created successfully! Please sign in to your account.')
   } catch (error) {
     console.error('Registration failed:', error)
     alert('Registration failed, please try again')
@@ -210,24 +177,20 @@ const handleRegister = async () => {
   font-size: var(--font-size-sm);
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   padding: var(--spacing-3) var(--spacing-4);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
   transition: var(--transition-normal);
-  background: white;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: var(--primary-color);
 }
 
-.form-group input.error,
-.form-group select.error {
+.form-group input.error {
   border-color: #e74c3c;
 }
 
