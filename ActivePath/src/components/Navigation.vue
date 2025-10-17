@@ -21,8 +21,8 @@
           <span>Activities</span>
         </RouterLink>
         <RouterLink to="/community" class="nav-item" active-class="active">
-          <div class="nav-icon">👥</div>
-          <span>Community</span>
+          <div class="nav-icon">🤖</div>
+          <span>AI Assistant</span>
         </RouterLink>
         <RouterLink to="/account" class="nav-item" active-class="active">
           <div class="nav-icon">👤</div>
@@ -83,8 +83,8 @@
         <span>Activities</span>
       </RouterLink>
       <RouterLink to="/community" class="mobile-nav-item" @click="closeMobileMenu">
-        <div class="nav-icon">👥</div>
-        <span>Community</span>
+        <div class="nav-icon">🤖</div>
+        <span>AI Assistant</span>
       </RouterLink>
       <RouterLink to="/account" class="mobile-nav-item" @click="closeMobileMenu">
         <div class="nav-icon">👤</div>
