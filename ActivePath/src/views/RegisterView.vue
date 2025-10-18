@@ -80,6 +80,11 @@
           </span>
         </div>
 
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="error-message-container">
+          <p class="error-message-text">{{ errorMessage }}</p>
+        </div>
+
         <button type="submit" class="submit-btn" :disabled="isLoading">
           {{ isLoading ? 'Creating account...' : 'Create Account' }}
         </button>
@@ -98,8 +103,10 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, email, minLength, sameAs } from '@vuelidate/validators'
 import { RouterLink, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
+import { signUp } from '../services/authService'
 
 const isLoading = ref(false)
+const errorMessage = ref('')
 const router = useRouter()
 const { register } = useUserStore()
 
@@ -135,10 +142,11 @@ const handleRegister = async () => {
   if (!isValid) return
 
   isLoading.value = true
+  errorMessage.value = ''
   
   try {
-    // Simulate registration request
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Sign up with Firebase
+    const userData = await signUp(form.email, form.password, form.username)
     
     // Register user and save to store
     register({
@@ -156,9 +164,9 @@ const handleRegister = async () => {
     } else {
       router.push('/')
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration failed:', error)
-    alert('Registration failed, please try again')
+    errorMessage.value = error.message || 'Registration failed, please try again'
   } finally {
     isLoading.value = false
   }
@@ -235,6 +243,21 @@ const handleRegister = async () => {
   color: #e74c3c;
   font-size: var(--font-size-sm);
   margin-top: var(--spacing-1);
+}
+
+.error-message-container {
+  background: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.error-message-text {
+  color: #dc2626;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  text-align: center;
 }
 
 .submit-btn {

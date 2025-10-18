@@ -50,6 +50,11 @@
           </span>
         </div>
 
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="error-message-container">
+          <p class="error-message-text">{{ errorMessage }}</p>
+        </div>
+
         <button type="submit" class="submit-btn" :disabled="isLoading">
           {{ isLoading ? 'Signing in...' : 'Sign In' }}
         </button>
@@ -57,6 +62,9 @@
 
       <div class="auth-links">
         <p>Don't have an account? <RouterLink to="/register">Create one now</RouterLink></p>
+        <p class="forgot-password">
+          <a href="#" @click.prevent="handleForgotPassword">Forgot your password?</a>
+        </p>
       </div>
     </div>
   </div>
@@ -68,9 +76,11 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
 import { RouterLink, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
+import { signIn, resetPassword } from '../services/authService'
 
 const router = useRouter()
 const isLoading = ref(false)
+const errorMessage = ref('')
 const { login } = useUserStore()
 
 const form = reactive({
@@ -92,33 +102,47 @@ const handleLogin = async () => {
   if (!isValid) return
 
   isLoading.value = true
+  errorMessage.value = ''
   
   try {
-    // Simulate login request
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Sign in with Firebase
+    const userData = await signIn(form.email, form.password)
     
-    // For demo purposes, we'll use the email as username
-    // In a real app, this would come from the API response
-    const username = form.email.split('@')[0]
+    // Extract username from email
+    const username = userData.email?.split('@')[0] || 'user'
     
     // Login user and save to store
     login({
       username: username,
-      email: form.email,
+      email: userData.email || '',
       userType: form.userType as 'user' | 'admin'
     })
     
-    // Handle successful login - redirect based on user type
+    // Redirect based on user type
     if (form.userType === 'admin') {
       router.push('/admin')
     } else {
       router.push('/')
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login failed:', error)
-    alert('Login failed, please try again')
+    errorMessage.value = error.message || 'Login failed, please try again'
   } finally {
     isLoading.value = false
+  }
+}
+
+const handleForgotPassword = async () => {
+  if (!form.email) {
+    errorMessage.value = 'Please enter your email address first'
+    return
+  }
+
+  try {
+    await resetPassword(form.email)
+    alert('Password reset email sent! Check your inbox.')
+  } catch (error: any) {
+    errorMessage.value = error.message || 'Failed to send reset email'
   }
 }
 </script>
@@ -193,6 +217,36 @@ const handleLogin = async () => {
   color: #e74c3c;
   font-size: var(--font-size-sm);
   margin-top: var(--spacing-1);
+}
+
+.error-message-container {
+  background: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.error-message-text {
+  color: #dc2626;
+  font-size: var(--font-size-sm);
+  margin: 0;
+  text-align: center;
+}
+
+.forgot-password {
+  margin-top: var(--spacing-4);
+}
+
+.forgot-password a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.forgot-password a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
 }
 
 .submit-btn {

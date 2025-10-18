@@ -1,4 +1,5 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, readonly } from 'vue'
+import { onAuthChange, logout as firebaseLogout } from '../services/authService'
 
 // User interface
 export interface User {
@@ -25,7 +26,7 @@ export const useUserStore = () => {
   }
 
   const login = (userData: { username: string; email: string; userType: 'user' | 'admin' }) => {
-    user.id = Date.now().toString() // Simple ID generation
+    user.id = userData.email || Date.now().toString() // Use email as ID or fallback
     user.username = userData.username
     user.email = userData.email
     user.userType = userData.userType
@@ -35,7 +36,15 @@ export const useUserStore = () => {
     localStorage.setItem('activepath_user', JSON.stringify(user))
   }
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Sign out from Firebase
+      await firebaseLogout()
+    } catch (error) {
+      console.error('Firebase logout error:', error)
+    }
+    
+    // Clear local state
     user.id = ''
     user.username = ''
     user.email = ''
@@ -55,9 +64,7 @@ export const useUserStore = () => {
   }
 
   const register = (userData: { username: string; email: string; userType: 'user' | 'admin' }) => {
-    // For registration, we'll just save the user data
-    // In a real app, this would call an API
-    user.id = Date.now().toString()
+    user.id = userData.email || Date.now().toString()
     user.username = userData.username
     user.email = userData.email
     user.userType = userData.userType
@@ -67,15 +74,33 @@ export const useUserStore = () => {
     localStorage.setItem('activepath_user', JSON.stringify(user))
   }
 
+  // Initialize Firebase auth listener
+  const initAuthListener = () => {
+    onAuthChange((firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in
+        user.id = firebaseUser.uid
+        user.username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User'
+        user.email = firebaseUser.email || ''
+        user.userType = 'user' // Default to regular user
+        user.isLoggedIn = true
+        
+        // Save to localStorage
+        localStorage.setItem('activepath_user', JSON.stringify(user))
+      } else {
+        // User is signed out
+        logout()
+      }
+    })
+  }
+
   return {
     user: readonly(user),
     setUser,
     login,
     logout,
     register,
-    loadUserFromStorage
+    loadUserFromStorage,
+    initAuthListener
   }
 }
-
-// Make user reactive and readonly
-import { readonly } from 'vue'

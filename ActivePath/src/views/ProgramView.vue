@@ -371,32 +371,32 @@ const startNavigation = async () => {
     
     // Create route line
     if (userLocation.value && selectedLocation.value) {
-      const route = [
-        [userLocation.value.lat, userLocation.value.lng],
-        [selectedLocation.value.lat, selectedLocation.value.lng]
-      ]
-      
-      routeLine = Leaflet.polyline(route, {
+             const route: [number, number][] = [
+               [userLocation.value.lat, userLocation.value.lng],
+               [selectedLocation.value.lat, selectedLocation.value.lng]
+             ]
+
+             routeLine = Leaflet.polyline(route, {
         color: '#2563eb',
         weight: 4,
         opacity: 0.8
       }).addTo(map)
       
-      // Add route markers
-      const startMarker = Leaflet.marker([userLocation.value.lat, userLocation.value.lng])
-        .bindPopup('<b>Start</b><br>Your Location')
-      
-      const endMarker = Leaflet.marker([selectedLocation.value.lat, selectedLocation.value.lng])
-        .bindPopup(`<b>Destination</b><br>${selectedLocation.value.name}`)
+       // Add route markers
+       const startMarker = Leaflet.marker([userLocation.value.lat, userLocation.value.lng] as [number, number])
+         .bindPopup('<b>Start</b><br>Your Location')
+
+       const endMarker = Leaflet.marker([selectedLocation.value.lat, selectedLocation.value.lng] as [number, number])
+         .bindPopup(`<b>Destination</b><br>${selectedLocation.value.name}`)
     }
     
-    // Fit map to show entire route
-    if (routeLine && userLocation.value && selectedLocation.value) {
-      const startMarker = Leaflet.marker([userLocation.value.lat, userLocation.value.lng])
-      const endMarker = Leaflet.marker([selectedLocation.value.lat, selectedLocation.value.lng])
-      const group = new Leaflet.featureGroup([routeLine, startMarker, endMarker])
-      map.fitBounds(group.getBounds().pad(0.1))
-    }
+     // Fit map to show entire route
+     if (routeLine && userLocation.value && selectedLocation.value) {
+       const startMarker = Leaflet.marker([userLocation.value.lat, userLocation.value.lng] as [number, number])
+       const endMarker = Leaflet.marker([selectedLocation.value.lat, selectedLocation.value.lng] as [number, number])
+       const group = new (Leaflet as any).featureGroup([routeLine, startMarker, endMarker])
+       map.fitBounds(group.getBounds().pad(0.1))
+     }
     
     // Invalidate size after route change
     setTimeout(() => {

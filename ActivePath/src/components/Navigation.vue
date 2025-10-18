@@ -127,7 +127,7 @@ import { useUserStore } from '../stores/userStore'
 import { useThemeStore } from '../stores/themeStore'
 
 const isMobileMenuOpen = ref(false)
-const { user, logout, loadUserFromStorage } = useUserStore()
+const { user, logout, loadUserFromStorage, initAuthListener } = useUserStore()
 const { themeIcon, themeText, toggleTheme, loadThemeFromStorage } = useThemeStore()
 
 const toggleMobileMenu = () => {
@@ -147,6 +147,7 @@ const handleLogout = () => {
 onMounted(() => {
   loadUserFromStorage()
   loadThemeFromStorage()
+  initAuthListener() // Initialize Firebase auth listener
 })
 </script>
 
